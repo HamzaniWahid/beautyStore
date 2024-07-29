@@ -25,6 +25,9 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             // ->topNavigation()
+            // ->brandLogo(fn () => view('components.application-logo'))
+            ->brandName('Beauty Store')
+            // ->favicon(asset('favicon.png'))
             ->databaseNotifications()
             ->sidebarCollapsibleOnDesktop()
             ->collapsedSidebarWidth('9rem')

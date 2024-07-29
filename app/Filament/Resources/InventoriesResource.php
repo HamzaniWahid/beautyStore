@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\InventoriesResource\Pages;
 use App\Filament\Resources\InventoriesResource\RelationManagers;
+use App\Imports\ContentsImport;
 use App\Models\Inventories;
 use App\Models\Kategories;
 use App\Models\Merek;
@@ -22,6 +23,8 @@ use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Filament\Actions\Action;
 
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+use YOS\FilamentExcel\Actions\Import;
 
 class InventoriesResource extends Resource
 {
@@ -78,7 +81,7 @@ class InventoriesResource extends Resource
                 TextColumn::make('jumlah')->label('Jumlah')->searchable(),
                 TextColumn::make('kategori.nama')->label('Kategori')->searchable(),
                 TextColumn::make('expired')
-                    ->label('Tanggal Expired')
+                    ->label('Tanggal_Expired')
                     ->searchable()
                     ->badge()
                     ->color(function (string $state): string {
@@ -92,11 +95,11 @@ class InventoriesResource extends Resource
                         \Log::info("State date: {$date->toDateString()}, Days remaining: {$daysRemaining}, Months remaining: {$monthsRemaining}, Years remaining: {$yearsRemaining}");
 
                         if ($daysRemaining < 30 && $monthsRemaining == 0 && $yearsRemaining == 0) {
-                            return 'danger'; // merah
+                            return 'secondary'; // merah
                         } elseif ($yearsRemaining == 0 && $monthsRemaining < 1) {
                             return 'warning'; // kuning
                         } else {
-                            return 'success'; // hijau
+                            return 'secondary'; // hijau
                         }
                         // if($monthsRemaining > 1){
                         //     return 'success';
@@ -108,10 +111,10 @@ class InventoriesResource extends Resource
                     ,
                 TextColumn::make('hargaJual')->searchable()
                     ->money('Rp.')
-                    ->label('Harga Jual'),
+                    ->label('Harga_Jual'),
                 TextColumn::make('hargaBeli')->searchable()
                     ->money('Rp.')
-                    ->label('Harga Beli')
+                    ->label('Harga_Beli')
                     ->hidden(fn() => !in_array(Auth::user()->email, [
                         'hamzaniwahid321@gmail.com'
                     ])),
@@ -124,9 +127,10 @@ class InventoriesResource extends Resource
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                ExportBulkAction::make()->label('Export'),
+                Tables\Actions\DeleteBulkAction::make(),
+                // Tables\Actions\BulkActionGroup::make([
+                // ]),
             ]);
     }
 
@@ -136,7 +140,6 @@ class InventoriesResource extends Resource
             //
         ];
     }
-
     public static function getPages(): array
     {
         return [
